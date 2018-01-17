@@ -68,24 +68,55 @@ namespace TicTacToe
             return true;
         }
 
-        //* TODO:  finish all of these that return true
+        // Returns true if any row has 5 x's or 5 o's.
+        // Else returns false.
         private bool IsAnyRowWinner()
         {
-            return true;
+            for (int i = 0; i < SIZE; i++)
+            {
+                if(IsRowWinner(i))
+                {
+                    return true;
+                }
+            }
+            return false;
         }
 
         private bool IsColumnWinner(int col)
         {
+            Label square = GetSquare(0, col);
+            string symbol = square.Text;
+            for (int row = 1; row < SIZE; row++)
+            {
+                square = GetSquare(row, col);
+                if (symbol == EMPTY || square.Text != symbol)
+                    return false;
+            }
             return true;
         }
 
         private bool IsAnyColumnWinner()
         {
-            return true;
+            for(int i = 0; i < 5; i++)
+            {
+                if(IsColumnWinner(i))
+                {
+                    return true;
+                }
+            }
+            return false;
         }
 
         private bool IsDiagonal1Winner()
         {
+            Label square = GetSquare((SIZE - 1), 0);
+            string symbol = square.Text;
+            for (int row = SIZE - 2, col = 1; col < SIZE; row--, col++)
+            {
+                square = GetSquare(row, col);
+                if (symbol == EMPTY || square.Text != symbol)
+                    return false;
+            }
             return true;
         }
 
@@ -104,11 +135,25 @@ namespace TicTacToe
 
         private bool IsAnyDiagonalWinner()
         {
-            return true;
+            if(IsDiagonal1Winner() || IsDiagonal2Winner())
+            {
+                return true;
+            }
+            return false;
         }
 
         private bool IsFull()
         {
+            for(int i = 0; i < SIZE; i++)
+            {
+                for(int j = 0; j < SIZE; j++)
+                {
+                    Label square = GetSquare(i, j);
+                    string symbol = square.Text;
+                    if (symbol == EMPTY || square.Text != symbol)
+                        return false;
+                }
+            }
             return true;
         }
 
@@ -199,10 +244,22 @@ namespace TicTacToe
         //* TODO:  finish these 2
         private void HighlightRow(int row)
         {
+            for(int i = 0; i < SIZE; i++)
+            {
+                Label square = GetSquare(row, i);
+                square.Enabled = true;
+                square.ForeColor = Color.Red;
+            }
         }
 
         private void HighlightDiagonal1()
         {
+            for (int row = SIZE - 1, col = 0; col < SIZE; row--, col++)
+            {
+                Label square = GetSquare(row, col);
+                square.Enabled = true;
+                square.ForeColor = Color.Red;
+            }
         }
 
         //* TODO:  finish this
@@ -211,10 +268,12 @@ namespace TicTacToe
             switch (winningDimension)
             {
                 case ROW:
-
+                    HighlightRow(winningDimension);
+                    resultLabel.Text = (player + " wins!");
                     break;
                 case COLUMN:
-
+                    HighlightColumn(winningDimension);
+                    resultLabel.Text = (player + " wins!");
                     break;
                 case DIAGONAL:
                     HighlightDiagonal(winningValue);
@@ -226,10 +285,18 @@ namespace TicTacToe
         //* TODO:  finish these 2
         private void ResetSquares()
         {
+            /*for(int i = 0; i < SIZE; i++)
+            {
+                for(int j = 0; j < SIZE; j++)
+                {
+                    GetRowAndColumn(, out i, out j);
+                }
+            }*/
         }
 
         private void MakeComputerMove()
         {
+
         }
 
         // Setting the enabled property changes the look and feel of the cell.
@@ -279,10 +346,12 @@ namespace TicTacToe
 
         private void newGameButton_Click(object sender, EventArgs e)
         {
+            
         }
 
         private void exitButton_Click(object sender, EventArgs e)
         {
+            Application.Exit();
         }
     }
 }
