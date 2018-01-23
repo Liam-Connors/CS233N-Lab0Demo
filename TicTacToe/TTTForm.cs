@@ -33,7 +33,7 @@ namespace TicTacToe
         const int ROW = 1;
         const int COLUMN = 2;
         const int DIAGONAL = 3;
-
+        
         // This method takes a row and column as parameters and 
         // returns a reference to a label on the form in that position
         private Label GetSquare(int row, int column)
@@ -68,8 +68,6 @@ namespace TicTacToe
             return true;
         }
 
-        // Returns true if any row has 5 x's or 5 o's.
-        // Else returns false.
         private bool IsAnyRowWinner()
         {
             for (int i = 0; i < SIZE; i++)
@@ -109,9 +107,9 @@ namespace TicTacToe
 
         private bool IsDiagonal1Winner()
         {
-            Label square = GetSquare((SIZE - 1), 0);
+            Label square = GetSquare(0, 0);
             string symbol = square.Text;
-            for (int row = SIZE - 2, col = 1; col < SIZE; row--, col++)
+            for (int row = 1, col = 1; row < SIZE; row++, col++)
             {
                 square = GetSquare(row, col);
                 if (symbol == EMPTY || square.Text != symbol)
@@ -122,9 +120,9 @@ namespace TicTacToe
 
         private bool IsDiagonal2Winner()
         {
-            Label square = GetSquare(0, (SIZE - 1));
+            Label square = GetSquare((SIZE - 1), 0);
             string symbol = square.Text;
-            for (int row = 1, col = SIZE - 2; row < SIZE; row++, col--)
+            for (int row = SIZE - 2, col = 1; col < SIZE; row--, col++)
             {
                 square = GetSquare(row, col);
                 if (symbol == EMPTY || square.Text != symbol)
@@ -241,20 +239,10 @@ namespace TicTacToe
 
         }
 
-        //* TODO:  finish these 2
+        //Highlights a row, depending on the parameter that you pass
         private void HighlightRow(int row)
         {
-            for(int i = 0; i < SIZE; i++)
-            {
-                Label square = GetSquare(row, i);
-                square.Enabled = true;
-                square.ForeColor = Color.Red;
-            }
-        }
-
-        private void HighlightDiagonal1()
-        {
-            for (int row = SIZE - 1, col = 0; col < SIZE; row--, col++)
+            for(int col = 0; col < SIZE; col++)
             {
                 Label square = GetSquare(row, col);
                 square.Enabled = true;
@@ -262,17 +250,28 @@ namespace TicTacToe
             }
         }
 
-        //* TODO:  finish this
+        //Highlights the first diagonal.
+        private void HighlightDiagonal1()
+        {
+            for (int row = 0, col = 0; col < SIZE; row++, col++)
+            {
+                Label square = GetSquare(row, col);
+                square.Enabled = true;
+                square.ForeColor = Color.Red;
+            }
+        }
+
+        //Highlights winning rows/columns/diagonals
         private void HighlightWinner(string player, int winningDimension, int winningValue)
         {
             switch (winningDimension)
             {
                 case ROW:
-                    HighlightRow(winningDimension);
+                    HighlightRow(winningValue);
                     resultLabel.Text = (player + " wins!");
                     break;
                 case COLUMN:
-                    HighlightColumn(winningDimension);
+                    HighlightColumn(winningValue);
                     resultLabel.Text = (player + " wins!");
                     break;
                 case DIAGONAL:
@@ -282,21 +281,45 @@ namespace TicTacToe
             }
         }
 
-        //* TODO:  finish these 2
+        //Resets all labels to being empty.
+        //Does NOT enable them!
         private void ResetSquares()
         {
-            /*for(int i = 0; i < SIZE; i++)
+            for(int i = 0; i < SIZE; i++)
             {
                 for(int j = 0; j < SIZE; j++)
                 {
-                    GetRowAndColumn(, out i, out j);
+                    GetSquare(i, j).Text = EMPTY;
                 }
-            }*/
+            }
         }
 
+        //Picks a random empty square and puts an O in it.
+        //If the computer wins, the game ends.
         private void MakeComputerMove()
         {
+            int winningDimension = NONE;
+            int winningValue = NONE;
 
+            Random rnd = new Random();
+            Label square;
+
+            do
+            {
+                int row = rnd.Next(0, SIZE);
+                int col = rnd.Next(0, SIZE);
+
+                square = GetSquare(row, col);
+            } while (square.Text != EMPTY);
+
+            square.Text = COMPUTER_SYMBOL;
+            DisableSquare(square);
+
+            if (IsWinner(out winningDimension, out winningValue))
+            {
+                HighlightWinner("Computer", winningDimension, winningValue);
+                DisableAllSquares();
+            }
         }
 
         // Setting the enabled property changes the look and feel of the cell.
@@ -334,7 +357,8 @@ namespace TicTacToe
             }
         }
 
-        //* TODO:  finish the event handlers
+        //If enabled, it changes a label to an X.
+        //If the game is won or tied, the game ends, else the computer moves.
         private void label_Click(object sender, EventArgs e)
         {
             int winningDimension = NONE;
@@ -342,13 +366,34 @@ namespace TicTacToe
 
             Label clickedLabel = (Label)sender;
 
+            clickedLabel.Text = USER_SYMBOL;
+            DisableSquare(clickedLabel);
+
+            if(IsWinner(out winningDimension, out winningValue))
+            {
+                HighlightWinner("Player 1", winningDimension, winningValue);
+                DisableAllSquares();
+            }
+            else if(IsFull())
+            {
+                resultLabel.Text = ("It's a tie.");
+                DisableAllSquares();
+            }
+            else
+            {
+                MakeComputerMove();
+            }
         }
 
+        //Resets the game state back to how it is at the start.
         private void newGameButton_Click(object sender, EventArgs e)
         {
-            
+            ResetSquares();
+            EnableAllSquares();
+            resultLabel.Text = EMPTY;
         }
 
+        //Exits the game.
         private void exitButton_Click(object sender, EventArgs e)
         {
             Application.Exit();
